@@ -1,4 +1,4 @@
-rng('default')
+% rng('default')
 R = 5; I = 500;
 J = I;
 K = I;
@@ -8,7 +8,7 @@ mode = 3;
 %X = createConstantRankTensor(R, I, J, K, 100);
 % [X,A,B,C] = getData(R, 300);
 a = load('dataset/ten_500_5_d.mat');
-X = a.X;
+X = double(a.X);
 first = 1;
 last = 100;
 % Initial batch for tensor
@@ -21,31 +21,36 @@ Xinit = X(:,:,first:last);
 % initialRank = getRankAutoten(Xinit, R);
 % For testing
 initialRank = 2;
-Facts = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000);
+% Facts = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000);
+Facts = parafac(Xinit, initialRank);
 % al = Facts.lambda;
 
 % CLARIFY THIS LINEop
-lambda = diag(Facts.lambda.^(1/mode));
-A_init = Facts.U{1} * lambda;
-B_init = Facts.U{2} * lambda;
-C_init = Facts.U{3} * lambda;
+% lambda = diag(Facts.lambda.^(1/mode));
+% A_init = Facts.U{1} * lambda;
+% B_init = Facts.U{2} * lambda;
+% C_init = Facts.U{3} * lambda;
+
+A_init = Facts{1};
+B_init = Facts{2};
+C_init = Facts{3};
 
 [Aupdated, colA] = normalization(A_init);
 [Bupdated, colB] = normalization(B_init);
 [Cupdated, colC] = normalization(C_init);
 
 
-lambda = colA .* colB .* colC;
+% lambda = colA .* colB .* colC;
 
 batch = 100;
 iter = I/batch;
 
 rank = zeros(iter,1);
 rank(1) = initialRank;
-newrho = cell(iter,1);
-rho = cell(iter,1);
-rho{1} = lambda;
-newrho{1} = lambda;
+% newrho = cell(iter,1);
+% rho = cell(iter,1);
+% rho{1} = lambda;
+% newrho{1} = lambda;
 newconcept = cell(iter,1);
 overlapconceptold = cell(iter,1);
 overlapconceptnew = cell(iter, 1);
@@ -62,23 +67,23 @@ for i=2:iter
 % For testing, remove this and use getRankAutoten 
     r = i;
     rank(i) = r;
-    [Aupdated, Bupdated, Cupdated, rhoNew, runningRank, newConcept, conceptOverlap, conceptOverlapOld, missingConcept, newRho]= seekAndDestroy(Aupdated, Bupdated, Cupdated, Xs, r, runningRank, mode, newrho{i-1});
-    rho{i} = rhoNew;
-    newrho{i} = newRho;
+    [Aupdated, Bupdated, Cupdated,runningRank, newConcept, conceptOverlap, conceptOverlapOld, missingConcept]= seekAndDestroy(Aupdated, Bupdated, Cupdated, Xs, r, runningRank, mode);
+%     rho{i} = rhoNew;
+%     newrho{i} = newRho;
     newconcept{i} = newConcept;
     overlapconceptold{i} = conceptOverlapOld;
     overlapconceptnew{i} = conceptOverlap;
 end
 % l = zeros(iter,1);
-c = zeros(1,runningRank);
-for i=1:iter
-    a = size(rho{i},2);
-    c(1:a) = c(1:a) + rho{i};
-end
-l = c./iter;
+% c = zeros(1,runningRank);
+% for i=1:iter
+%     a = size(rho{i},2);
+%     c(1:a) = c(1:a) + rho{i};
+% end
+% l = c./iter;
 
-l
-Xcomputed = tensor(ktensor(l',Aupdated, Bupdated, Cupdated));
+
+Xcomputed = tensor(ktensor(ones(runningRank,1),Aupdated, Bupdated, Cupdated));
 % re1 = relativeError(X, Xcomputed1);
 re = relativeError(X, Xcomputed);
 cpErr = cpALSError(X, R);

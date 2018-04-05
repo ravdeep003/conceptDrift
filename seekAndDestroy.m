@@ -1,10 +1,11 @@
-function [Aupdated, Bupdated, Cupdated, rho, runningRank, newConcept, overlapConcept, overlapConceptOld, missingConcept, newRho] = seekAndDestroy(factA, factB, factC, Xs, batchRank, runningRank, mode, lambda)
-    Fnew = cp_als(Xs,batchRank,'tol',1.0e-7, 'maxiters', 1000);
+function [Aupdated, Bupdated, Cupdated, runningRank, newConcept, overlapConcept, overlapConceptOld, missingConcept] = seekAndDestroy(factA, factB, factC, Xs, batchRank, runningRank, mode)
+%     Fnew = parafac(Xs,batchRank,'tol',1.0e-7, 'maxiters', 1000);
+    Fnew = parafac(Xs,batchRank);
 %     Fnew.lambda
-    l1 = diag(Fnew.lambda .^ (1/mode));
-    A = Fnew.U{1} * l1;
-    B = Fnew.U{2} * l1;
-    C = Fnew.U{3} * l1;
+%     l1 = diag(Fnew.lambda .^ (1/mode));
+    A = Fnew{1};
+    B = Fnew{2};
+    C = Fnew{3};
 
     [normMatA, colA] = normalization(A);
     [normMatB, colB] = normalization(B);
@@ -12,10 +13,10 @@ function [Aupdated, Bupdated, Cupdated, rho, runningRank, newConcept, overlapCon
 %     Cnorm = C * diag(1./colC);
 %     Cnorm = normMatC;
 
-    rhoVal = colA .* colB .*colC;
+%     rhoVal = colA .* colB .*colC;
     [newConcept, overlapConcept, overlapConceptOld, missingConcept] = findConceptOverlap(factA, normMatA);
-    rho = updateRho(rhoVal, newConcept, overlapConcept, overlapConceptOld, runningRank);
-    newRho = updateNewRho(rhoVal,lambda, newConcept, overlapConcept, overlapConceptOld, runningRank);
+%     rho = updateRho(rhoVal, newConcept, overlapConcept, overlapConceptOld, runningRank);
+%     newRho = updateNewRho(rhoVal,lambda, newConcept, overlapConcept, overlapConceptOld, runningRank);
     
    if newConcept
         runningRank = runningRank + size(newConcept,2);
