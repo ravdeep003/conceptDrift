@@ -1,9 +1,9 @@
 % rng('default')
 
 close all;clc;clear all;
-R = 5; I = 100;
-J = 100;
-K = 100;
+% R = 5; I = 100;
+% J = 100;
+% K = 100;
 mode = 3;
 % [X, A, B, C] = createTensor(R, I, J, K);
 % X = X(:,:,1:200);
