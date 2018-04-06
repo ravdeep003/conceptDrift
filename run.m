@@ -103,7 +103,7 @@ end
 
 % l
 Xcomputed = ktensor(l',Aupdated, Bupdated, Cupdated);
-X = ktensor(ones(R,1),A, B ,C );
+X = ktensor(ones(R,1),A, B ,C(1:last,:));
 
 % re1 = relativeError(X, Xcomputed1);
 re = relativeError(X, Xcomputed);

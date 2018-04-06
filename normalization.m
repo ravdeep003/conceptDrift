@@ -1,5 +1,10 @@
 function [normMat, colNorm] = normalization(Amat)
-    colNorm = vecnorm(Amat);
+    try
+      colNorm = vecnorm(Amat);
+    catch
+        % older version of matlab doesn't have vecnorm
+        colNorm = sqrt(sum(Amat.^2));
+    end
     n = size(colNorm, 2);
     normMat = [];
     for i=1:n
