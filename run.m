@@ -20,7 +20,7 @@ C = a.C;
 initialRank = a.initialRank;
 R = a.R;
 
-numExperiments = 3;
+numExperiments = 20;
 filename1 = sprintf('result_%d_%d', K, R);
 filename2 = sprintf('rank_%d_%d', K, R);
 filename3 = sprintf('error_%d_%d', K, R);
