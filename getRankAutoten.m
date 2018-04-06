@@ -8,5 +8,5 @@ function estRank=getRankAutoten(X, R)
         allRank(i) = K;
     end
     estRank = mode(allRank);
-    disp(allRank);
+%     disp(allRank);
 end

@@ -1,4 +1,4 @@
-function [A, B, C,initialRank] = createDatasetGeneric(I, J, K, R,batch)
+function [A, B, C,initialRank, X] = createDatasetGeneric(I, J, K, R,batch)
 % I,J & K should be multiple of 100
 % It will output factor matrices and a tensor of full Rank R
 A = rand(I, R);
@@ -20,6 +20,6 @@ for i=1:iter
     initial = initial + batch;
     last = last + batch;
 end
-% X = tensor(ktensor(ones(R,1),A, B ,C ));
+X = tensor(ktensor(ones(R,1),A, B ,C ));
 initialRank = size(find(sum(C(1:batch,:)>0)),2);
 end

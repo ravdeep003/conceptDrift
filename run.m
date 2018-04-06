@@ -1,8 +1,9 @@
 % rng('default')
+
 close all;clc;clear all;
-R = 5; I = 200;
-J = 200;
-K = 1000;
+R = 5; I = 100;
+J = 100;
+K = 100;
 mode = 3;
 % [X, A, B, C] = createTensor(R, I, J, K);
 % X = X(:,:,1:200);
@@ -10,14 +11,27 @@ mode = 3;
 % [X,A,B,C] = getData(R, 300);
 % a = load('dataset/ten_500_5_d.mat');
 % X = a.X;
-batch = 100;
-[A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
+batch = 50;
+% [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
+a = load('test.mat');
+A = a.A;
+B = a.B;
+C = a.C;
+initialRank = a.initialRank;
+R = a.R;
+
+numExperiments = 3;
+filename1 = sprintf('result_%d_%d', K, R);
+filename2 = sprintf('rank_%d_%d', K, R);
+filename3 = sprintf('error_%d_%d', K, R);
+for num =1:numExperiments
 
 first = 1;
 last = batch;
 % Initial batch for tensor
  
-Xinit = X(:,:,first:last);
+% Xinit = X(:,:,first:last);
+Xinit = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
 % Get Rank using ADRCP
 % initialRank = getRankADR(Xinit, 4);
 % Get Rank using Autoten
@@ -43,9 +57,9 @@ lambda = colA .* colB .* colC;
 
 
 iter = K/batch;
-fit = zeros(iter,1);
-fit(1) = out.fit;
-rank = zeros(iter,1);
+fit = zeros(1,iter);
+fit(1) = 1 - out.fit;
+rank = zeros(1, iter);
 rank(1) = initialRank;
 newrho = cell(iter,1);
 rho = cell(iter,1);
@@ -54,6 +68,7 @@ newrho{1} = lambda;
 newconcept = cell(iter,1);
 overlapconceptold = cell(iter,1);
 overlapconceptnew = cell(iter, 1);
+missingconcept = cell(iter, 1);
 
 runningRank = initialRank;
 
@@ -62,7 +77,8 @@ runningRank = initialRank;
 for i=2:iter
     first = last + 1;
     last = i*batch;
-    Xs = X(:,:,first:last);
+%     Xs = X(:,:,first:last);
+    Xs = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
     r = getRankAutoten(Xs, R);
 % For testing, remove this and use getRankAutoten 
 %     r = i;
@@ -73,97 +89,37 @@ for i=2:iter
     newconcept{i} = newConcept;
     overlapconceptold{i} = conceptOverlapOld;
     overlapconceptnew{i} = conceptOverlap;
-
-
-
-    
+    missingconcept{i} = missingConcept;
 
 % l = zeros(iter,1);
-c = zeros(1,runningRank);
+c = zeros(size(rho,1),runningRank);
+l = zeros(1,runningRank);
 for z=1:iter
     a = size(rho{z},2);
-    c(1:a) = c(1:a) + rho{z};
+    c(z,1:a) = rho{z};
 end
-l = c./iter;
+ l = sum(c)./sum(c~=0,1);
+% l = c./iter;
 
 % l
-Xcomputed = tensor(ktensor(l',Aupdated, Bupdated, Cupdated));
+Xcomputed = ktensor(l',Aupdated, Bupdated, Cupdated);
+X = ktensor(ones(R,1),A, B ,C );
+
 % re1 = relativeError(X, Xcomputed1);
-re = relativeError(X(:,:,1:last), Xcomputed);
+re = relativeError(X, Xcomputed);
 fit(i) = re;
 
 % disp(re1);
-disp("seekAndDestroy Error");  disp(re);
+% disp("seekAndDestroy Error");  
+disp(re);
 % disp("cpALS Error"); disp(cpErr);
 end
 cpErr = cpALSError(X, R);
-disp("cpALS Error"); disp(cpErr);
-% l1 = c.^(1/mode);
-% l1 = ones(runningRank,1);
-% Xcomputed1 = tensor(ktensor(l1,Aupdated, Bupdated, Cupdated));
+% disp("cpALS Error"); disp(cpErr);
 
+result = {re, initialRank, runningRank, R, cpErr, batch, I, J, K};
+dlmwrite(filename1, result, '-append');
+dlmwrite(filename2, rank, '-append');
+dlmwrite(filename3, fit, '-append');
 
-% [newConcept, overlapConceptOld, overlapConceptNew] = findConceptOverlap(normMatB, normMatB2);
-% disp("B")
-%   disp("New");disp(newConcept);
-%     disp("OverlapOld");disp(overlapConceptOld);
-%     disp("Overlapnew");disp(overlapConceptNew);
-%     
-% [newConcept, overlapConceptOld, overlapConceptNew] = findConceptOverlap(normMatC, normMatC2);
-% disp("C")
-%   disp("New");disp(newConcept);
-%     disp("OverlapOld");disp(overlapConceptOld);
-%     disp("Overlapnew");disp(overlapConceptNew);
-% 
-% disp(rank);
-% if newConcept
-%     disp("New Concept added");
-% else
-%     disp("Overlap")
-% end
-
-% currentRank = R;
-% F = cp_als(Xinit, initialRank);
-% lambda = F.lambda;
-% % Aold = F.U{1};
-% % Bold = F.U{2};
-% % Cold = F.U{3};
-% 
-% Aold = F.U{1} * diag(lambda.^(1/3));
-% Bold = F.U{2} * diag(lambda.^(1/3));
-% Cold = F.U{3} * diag(lambda.^(1/3));
-% 
-% [normMatA, colA] = normalization(Aold);
-% [normMatB, colB] = normalization(Bold);
-% [normMatC, colC] = normalization(Cold);
-% lambda = colA .* colB .*colC;
-% 
-% runningRank = initialRank;
-% 
-% [Anew, Bnew, Cnew, newLambda, currentRank, runningRank] = seekAndDestroy(normMatA, normMatB, normMatC, lambda, X(:,:,31:60), initialRank, runningRank);
-% [Anew1, Bnew1, Cnew1, newLambda1, finalRank,runningRank ] = seekAndDestroy(Anew, Bnew, Cnew, newLambda, X(:,:,61:100), currentRank, runningRank);
-% % [Anew2, Bnew2, Cnew2, newLambda2, finalRan2,runningRank ] = seekAndDestroy(Anew1, Bnew1, Cnew1, newLambda, X(:,:,71:100), finalRank, runningRank);
-% 
-% % testingLambda = ones(currentRank,1);
-% % for i=1:currentRank
-% %     testingLambda(i,:) = norm(Anew(:,i)) + norm(Bnew(:,i)) + norm(Cnew(:,i));
-% % end
-% 
-% maxlen = max([length(lambda), length(newLambda), length(newLambda1)]);
-% lambda(end+1:maxlen) = 0;
-% newLambda(end+1:maxlen) = 0;
-% newLambda1(end+1:maxlen) = 0;
-% % newLambda2(end+1:maxlen) = 0;
-% 
-% a = [lambda newLambda newLambda1];
-% l = [];
-% for i=1:maxlen
-%     c = a(:,i);
-%     l(i) = mean(c(c~=0));
-% end
-% % l = mean(a);
-% Xcomputed = tensor(ktensor(l',Anew1, Bnew1,Cnew1));
-% % Xcomputed = tensor(ktensor(ones(R,1), Anew, Bnew,Cnew));
-% % Xcomputed =  sptensor(reshape(khatrirao(Bnew,Anew)*Cnew',[300 300 300]));
-% re = relativeError(X, Xcomputed);
-% disp(re);
+end
