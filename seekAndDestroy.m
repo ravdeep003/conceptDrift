@@ -1,5 +1,5 @@
 function [Aupdated, Bupdated, Cupdated, rho, runningRank, newConcept, overlapConcept, overlapConceptOld, missingConcept, newRho] = seekAndDestroy(factA, factB, factC, Xs, batchRank, runningRank, mode, lambda)
-    Fnew = cp_als(Xs,batchRank,'tol',1.0e-7, 'maxiters', 1000);
+    [Fnew, ~, out] = cp_als(Xs,batchRank,'tol',1.0e-7, 'maxiters', 1000, 'printitn',0);
 %     Fnew.lambda
     l1 = diag(Fnew.lambda .^ (1/mode));
     A = Fnew.U{1} * l1;

@@ -1,16 +1,20 @@
-rng('default')
-R = 5; I = 500;
-J = I;
-K = I;
+% rng('default')
+close all;clc;clear all;
+R = 5; I = 200;
+J = 200;
+K = 1000;
 mode = 3;
 % [X, A, B, C] = createTensor(R, I, J, K);
 % X = X(:,:,1:200);
 %X = createConstantRankTensor(R, I, J, K, 100);
 % [X,A,B,C] = getData(R, 300);
-a = load('dataset/ten_500_5_d.mat');
-X = a.X;
+% a = load('dataset/ten_500_5_d.mat');
+% X = a.X;
+batch = 100;
+[A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
+
 first = 1;
-last = 100;
+last = batch;
 % Initial batch for tensor
  
 Xinit = X(:,:,first:last);
@@ -20,8 +24,8 @@ Xinit = X(:,:,first:last);
 
 % initialRank = getRankAutoten(Xinit, R);
 % For testing
-initialRank = 2;
-Facts = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000);
+% initialRank = 2;
+[Facts ~, out] = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000, 'printitn', 0);
 % al = Facts.lambda;
 
 % CLARIFY THIS LINEop
@@ -37,9 +41,10 @@ C_init = Facts.U{3} * lambda;
 
 lambda = colA .* colB .* colC;
 
-batch = 100;
-iter = I/batch;
 
+iter = K/batch;
+fit = zeros(iter,1);
+fit(1) = out.fit;
 rank = zeros(iter,1);
 rank(1) = initialRank;
 newrho = cell(iter,1);
@@ -58,9 +63,9 @@ for i=2:iter
     first = last + 1;
     last = i*batch;
     Xs = X(:,:,first:last);
-%     r = getRankAutoten(Xs, R);
+    r = getRankAutoten(Xs, R);
 % For testing, remove this and use getRankAutoten 
-    r = i;
+%     r = i;
     rank(i) = r;
     [Aupdated, Bupdated, Cupdated, rhoNew, runningRank, newConcept, conceptOverlap, conceptOverlapOld, missingConcept, newRho]= seekAndDestroy(Aupdated, Bupdated, Cupdated, Xs, r, runningRank, mode, newrho{i-1});
     rho{i} = rhoNew;
@@ -68,25 +73,31 @@ for i=2:iter
     newconcept{i} = newConcept;
     overlapconceptold{i} = conceptOverlapOld;
     overlapconceptnew{i} = conceptOverlap;
-end
+
+
+
+    
+
 % l = zeros(iter,1);
 c = zeros(1,runningRank);
-for i=1:iter
-    a = size(rho{i},2);
-    c(1:a) = c(1:a) + rho{i};
+for z=1:iter
+    a = size(rho{z},2);
+    c(1:a) = c(1:a) + rho{z};
 end
 l = c./iter;
 
-l
+% l
 Xcomputed = tensor(ktensor(l',Aupdated, Bupdated, Cupdated));
 % re1 = relativeError(X, Xcomputed1);
-re = relativeError(X, Xcomputed);
-cpErr = cpALSError(X, R);
+re = relativeError(X(:,:,1:last), Xcomputed);
+fit(i) = re;
+
 % disp(re1);
 disp("seekAndDestroy Error");  disp(re);
+% disp("cpALS Error"); disp(cpErr);
+end
+cpErr = cpALSError(X, R);
 disp("cpALS Error"); disp(cpErr);
-
-
 % l1 = c.^(1/mode);
 % l1 = ones(runningRank,1);
 % Xcomputed1 = tensor(ktensor(l1,Aupdated, Bupdated, Cupdated));
