@@ -13,7 +13,7 @@ mode = 3;
 % X = a.X;
 batch = 100;
 % [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
-a = load('test.mat');
+a = load('dataset/experimentDataset/ten_1000_5_factors.mat');
 A = a.A;
 B = a.B;
 C = a.C;
@@ -22,10 +22,10 @@ R = a.R;
 I = size(A,1);
 J = size(B,1);
 K = size(C,1);
-numExperiments = 2;
-filename1 = sprintf('result_%d_%d', K, R);
-filename2 = sprintf('rank_%d_%d', K, R);
-filename3 = sprintf('error_%d_%d', K, R);
+numExperiments = 20;
+filename1 = sprintf('results/result_%d_%d_nirvana', K, R);
+filename2 = sprintf('results/rank_%d_%d_nirvana', K, R);
+filename3 = sprintf('results/error_%d_%d_nirvana', K, R);
 for num =1:numExperiments
 
 first = 1;
@@ -81,7 +81,10 @@ for i=2:iter
     last = i*batch;
 %     Xs = X(:,:,first:last);
     Xs = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
-    r = getRankAutoten(Xs, R);
+%     Autoten Rank
+%     r = getRankAutoten(Xs, R);
+%     Nirvana Rank
+    r = size(find(sum(C(first:last,:)>0)),2);
 % For testing, remove this and use getRankAutoten 
 %     r = i;
     rank(i) = r;
