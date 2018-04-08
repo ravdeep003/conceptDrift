@@ -1,10 +1,10 @@
 function run(fname)
 % rng('default')
-close all;clc;clearvars -except fname;
+
 % R = 5; I = 100;
 % J = 100;
 % K = 100;
-mode = 3;
+
 % [X, A, B, C] = createTensor(R, I, J, K);
 % X = X(:,:,1:200);
 %X = createConstantRankTensor(R, I, J, K, 100);
@@ -14,6 +14,10 @@ mode = 3;
 % batch = 100;
 % [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
 % a = load('dataset/experimentDataset/ten_500_2_5.mat');
+numExperiments = 2;
+for num =1:numExperiments
+close all;clc;clearvars -except fname num numExperiments;
+mode = 3;
 a = load(fname);
 A = a.A;
 B = a.B;
@@ -24,11 +28,10 @@ R = a.R;
 I = size(A,1);
 J = size(B,1);
 K = size(C,1);
-numExperiments = 1;
+
 filename1 = sprintf('results/result_%d_%d_nirvana', K, R);
 filename2 = sprintf('results/rank_%d_%d_nirvana', K, R);
 filename3 = sprintf('results/error_%d_%d_nirvana', K, R);
-for num =1:numExperiments
 
 first = 1;
 last = batch;
