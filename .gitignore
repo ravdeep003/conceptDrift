@@ -1,3 +1,4 @@
 dataset/
 *.mat
-run.m~
+*.m~
+results/
