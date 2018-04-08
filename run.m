@@ -13,7 +13,7 @@ mode = 3;
 % X = a.X;
 batch = 100;
 % [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
-a = load('test.mat');
+a = load('dataset/experimentDataset/ten_500_2_5.mat');
 A = a.A;
 B = a.B;
 C = a.C;
@@ -22,10 +22,10 @@ R = a.R;
 I = size(A,1);
 J = size(B,1);
 K = size(C,1);
-numExperiments = 2;
-filename1 = sprintf('result_%d_%d', K, R);
-filename2 = sprintf('rank_%d_%d', K, R);
-filename3 = sprintf('error_%d_%d', K, R);
+numExperiments = 20;
+filename1 = sprintf('results/result_%d_%d_nirvana', K, R);
+filename2 = sprintf('results/rank_%d_%d_nirvana', K, R);
+filename3 = sprintf('results/error_%d_%d_nirvana', K, R);
 for num =1:numExperiments
 
 first = 1;
@@ -34,6 +34,8 @@ last = batch;
  
 % Xinit = X(:,:,first:last);
 Xinit = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
+ 
+
 % Get Rank using ADRCP
 % initialRank = getRankADR(Xinit, 4);
 % Get Rank using Autoten
@@ -41,7 +43,9 @@ Xinit = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
 % initialRank = getRankAutoten(Xinit, R);
 % For testing
 % initialRank = 2;
-[Facts ~, out] = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000, 'printitn', 0);
+% [Facts ~, out] = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000, 'printitn', 0);
+[Facts, out] = runCPALS(Xinit, initialRank);
+% disp("cp_als fit");disp(out.fit);
 % al = Facts.lambda;
 
 % CLARIFY THIS LINEop
@@ -60,7 +64,7 @@ lambda = colA .* colB .* colC;
 
 iter = K/batch;
 fit = zeros(1,iter);
-fit(1) = 1 - out.fit;
+fit(1) = 1 - out;
 rank = zeros(1, iter);
 rank(1) = initialRank;
 newrho = cell(iter,1);
@@ -80,8 +84,13 @@ for i=2:iter
     first = last + 1;
     last = i*batch;
 %     Xs = X(:,:,first:last);
-    Xs = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
-    r = getRankAutoten(Xs, R);
+      Xs = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
+%       Xs = ktensor(ones(R,1),A, B ,C(first:last,:));
+
+%     Autoten Rank
+%     r = getRankAutoten(Xs, R);
+%     Nirvana Rank
+    r = size(find(sum(C(first:last,:)>0)),2);
 % For testing, remove this and use getRankAutoten 
 %     r = i;
     rank(i) = r;
@@ -104,16 +113,17 @@ end
 % l = c./iter;
 
 % l
-Xcomputed = ktensor(l',Aupdated, Bupdated, Cupdated);
-X = ktensor(ones(R,1),A, B ,C(1:last,:));
+Xcomputed = tensor(ktensor(l',Aupdated, Bupdated, Cupdated));
+X = tensor(ktensor(ones(R,1),A, B ,C(1:last,:)));
 
 % re1 = relativeError(X, Xcomputed1);
 re = relativeError(X, Xcomputed);
+
 fit(i) = re;
 
 % disp(re1);
 % disp("seekAndDestroy Error");  
-disp(re);
+% disp(re);
 % disp("cpALS Error"); disp(cpErr);
 end
 cpErr = cpALSError(X, R);
