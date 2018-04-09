@@ -1,4 +1,5 @@
-function run(fname)
+function run(fname, wid, kk)
+fname
 % rng('default')
 
 % R = 5; I = 100;
@@ -14,9 +15,11 @@ function run(fname)
 % batch = 100;
 % [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
 % a = load('dataset/experimentDataset/ten_500_2_5.mat');
-numExperiments = 2;
+numExperiments = 10;
 for num =1:numExperiments
-close all;clc;clearvars -except fname num numExperiments;
+close all;clc; clearvars -except fname num numExperiments kk wid;
+% t = getCurrentTask();
+% wid = t.ID;
 mode = 3;
 a = load(fname);
 A = a.A;
@@ -29,10 +32,11 @@ I = size(A,1);
 J = size(B,1);
 K = size(C,1);
 
-filename1 = sprintf('results/result_%d_%d_nirvana', K, R);
-filename2 = sprintf('results/rank_%d_%d_nirvana', K, R);
-filename3 = sprintf('results/error_%d_%d_nirvana', K, R);
-
+filename1 = sprintf('results/result_%d_%d_nirvana_%d', K, R, wid);
+filename2 = sprintf('results/rank_%d_%d_nirvana_%d', K, R, wid);
+filename3 = sprintf('results/error_%d_%d_nirvana_%d', K, R, wid);
+% fid2 = fopen(filename2, 'a');
+% fid3 = fopen(filename3, 'a');
 first = 1;
 last = batch;
 % Initial batch for tensor
@@ -134,7 +138,7 @@ end
 cpErr = cpALSError(X, R);
 % disp("cpALS Error"); disp(cpErr);
 
-result = {re, initialRank, runningRank, R, cpErr, batch, I, J, K};
+result = {re, initialRank, runningRank, R, cpErr, batch, I, J, K, kk};
 dlmwrite(filename1, result, '-append');
 dlmwrite(filename2, rank, '-append');
 dlmwrite(filename3, fit, '-append');

@@ -1,6 +1,11 @@
-for kk=1:2
-% fname=sprintf('/home/egujr001/MATLAB/Projects/SDM18_SAMBATEN/NEW/datasets/ten_100/ten_100_10_%d.mat',kk);
+tic;
+ticBytes(gcp);
+parfor kk=1:4
 fname = sprintf('dataset/test/ten_100_10_%d.mat', kk);
-fname
-run(fname);
+% t = getCurrentTask();
+% fname
+run(fname, t.ID, kk);
+% run(fname, 999, kk);
 end
+tocBytes(gcp)
+toc
