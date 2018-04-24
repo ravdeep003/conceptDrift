@@ -1,3 +1,5 @@
+%Ravdeep Pasricha , Ekta Gujral, Vagelis Papalexakis 2018
+%Computer Science and Engineering, University of California, Riverside
 function [A, B, C,initialRank] = createDatasetGeneric(I, J, K, R,batch)
 % I,J & K should be multiple of 100
 % It will output factor matrices and a tensor of full Rank R
@@ -9,6 +11,7 @@ last = batch;
 temp = generateC(R, batch);
 
 iter = K/batch;
+
 % n = randperm(size(temp,1)/batch, iter);
 n = randi([1,size(temp,1)/batch],1,iter);
 

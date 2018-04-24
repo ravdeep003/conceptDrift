@@ -1,25 +1,10 @@
+%Ravdeep Pasricha , Ekta Gujral, Vagelis Papalexakis 2018
+%Computer Science and Engineering, University of California, Riverside
 function run(fname, wid, kk)
-fname
-% rng('default')
-
-% R = 5; I = 100;
-% J = 100;
-% K = 100;
-
-% [X, A, B, C] = createTensor(R, I, J, K);
-% X = X(:,:,1:200);
-%X = createConstantRankTensor(R, I, J, K, 100);
-% [X,A,B,C] = getData(R, 300);
-% a = load('dataset/ten_500_5_d.mat');
-% X = a.X;
-% batch = 100;
-% [A,B,C,initialRank, X] = createDatasetGeneric(I,J,K,R,batch);
-% a = load('dataset/experimentDataset/ten_500_2_5.mat');
+%
 numExperiments = 10;
 for num =1:numExperiments
 close all;clc; clearvars -except fname num numExperiments kk wid;
-% t = getCurrentTask();
-% wid = t.ID;
 mode = 3;
 a = load(fname);
 A = a.A;
@@ -35,29 +20,23 @@ K = size(C,1);
 filename1 = sprintf('results/result_%d_%d_nirvana_%d', K, R, wid);
 filename2 = sprintf('results/rank_%d_%d_nirvana_%d', K, R, wid);
 filename3 = sprintf('results/error_%d_%d_nirvana_%d', K, R, wid);
-% fid2 = fopen(filename2, 'a');
-% fid3 = fopen(filename3, 'a');
+
 first = 1;
 last = batch;
-% Initial batch for tensor
- 
+% Initial batch for tensor 
 % Xinit = X(:,:,first:last);
 Xinit = tensor(ktensor(ones(R,1),A, B ,C(first:last,:)));
  
 
-% Get Rank using ADRCP
-% initialRank = getRankADR(Xinit, 4);
+
+
 % Get Rank using Autoten
-
 % initialRank = getRankAutoten(Xinit, R);
-% For testing
-% initialRank = 2;
-% [Facts ~, out] = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000, 'printitn', 0);
-[Facts, out] = runCPALS(Xinit, initialRank);
-% disp("cp_als fit");disp(out.fit);
-% al = Facts.lambda;
 
-% CLARIFY THIS LINEop
+% [Facts ~, out] = cp_als(Xinit, initialRank, 'tol',1.0e-7, 'maxiters', 1000, 'printitn', 0);
+
+[Facts, out] = runCPALS(Xinit, initialRank);
+
 lambda = diag(Facts.lambda.^(1/mode));
 A_init = Facts.U{1} * lambda;
 B_init = Facts.U{2} * lambda;
@@ -76,10 +55,8 @@ fit = zeros(1,iter);
 fit(1) = 1 - out;
 rank = zeros(1, iter);
 rank(1) = initialRank;
-newrho = cell(iter,1);
 rho = cell(iter,1);
 rho{1} = lambda;
-newrho{1} = lambda;
 newconcept = cell(iter,1);
 overlapconceptold = cell(iter,1);
 overlapconceptnew = cell(iter, 1);
@@ -87,8 +64,7 @@ missingconcept = cell(iter, 1);
 
 runningRank = initialRank;
 
-% for testing
-% iter = 3;
+
 for i=2:iter
     first = last + 1;
     last = i*batch;
@@ -98,20 +74,17 @@ for i=2:iter
 
 %     Autoten Rank
 %     r = getRankAutoten(Xs, R);
-%     Nirvana Rank
-    r = size(find(sum(C(first:last,:)>0)),2);
-% For testing, remove this and use getRankAutoten 
-%     r = i;
+%     Oracle Rank
+      r = size(find(sum(C(first:last,:)>0)),2);
+
     rank(i) = r;
-    [Aupdated, Bupdated, Cupdated, rhoNew, runningRank, newConcept, conceptOverlap, conceptOverlapOld, missingConcept, newRho]= seekAndDestroy(Aupdated, Bupdated, Cupdated, Xs, r, runningRank, mode, newrho{i-1});
+    [Aupdated, Bupdated, Cupdated, rhoNew, runningRank, newConcept, conceptOverlap, conceptOverlapOld, missingConcept]= seekAndDestroy(Aupdated, Bupdated, Cupdated, Xs, r, runningRank, mode);
     rho{i} = rhoNew;
-    newrho{i} = newRho;
     newconcept{i} = newConcept;
     overlapconceptold{i} = conceptOverlapOld;
     overlapconceptnew{i} = conceptOverlap;
     missingconcept{i} = missingConcept;
 
-% l = zeros(iter,1);
 c = zeros(size(rho,1),runningRank);
 l = zeros(1,runningRank);
 for z=1:iter
@@ -119,13 +92,11 @@ for z=1:iter
     c(z,1:a) = rho{z};
 end
  l = sum(c)./sum(c~=0,1);
-% l = c./iter;
 
-% l
+
 Xcomputed = tensor(ktensor(l',Aupdated, Bupdated, Cupdated));
 X = tensor(ktensor(ones(R,1),A, B ,C(1:last,:)));
 
-% re1 = relativeError(X, Xcomputed1);
 re = relativeError(X, Xcomputed);
 
 fit(i) = re;

@@ -1,3 +1,5 @@
+%Ravdeep Pasricha , Ekta Gujral, Vagelis Papalexakis 2018
+%Computer Science and Engineering, University of California, Riverside
 function estRank=getRankAutoten(X, R)
     n = 10;
     maxRank = 2 * R;

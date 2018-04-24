@@ -1,3 +1,5 @@
+%Ravdeep Pasricha , Ekta Gujral, Vagelis Papalexakis 2018
+%Computer Science and Engineering, University of California, Riverside
 function createDatasets(I,J,K,R,batch,numofDatasets)
 for i = 1:numofDatasets
 [A,B,C,initialRank] =  createDatasetGeneric(I, J, K, R,batch);

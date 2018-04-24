@@ -1,3 +1,5 @@
+%Ravdeep Pasricha , Ekta Gujral, Vagelis Papalexakis 2018
+%Computer Science and Engineering, University of California, Riverside
 function [newConcept, overlapConcept, overlapConceptOld, missingConcept]=findConceptOverlap(Aold, Anew)
     % Input should be normalized matrix
     threshold = 0.6;
@@ -11,10 +13,6 @@ function [newConcept, overlapConcept, overlapConceptOld, missingConcept]=findCon
         for j = 1:size(allcomb,1)
           val = dot(Aold(1:end, :), Anew(:,allcomb(j,:)));
           sumDot = sum(val);
-%           disp(j);
-%           disp(allcomb(j,:));
-%           disp(sumDot);
-%           disp(val);
           if sumDot > sumVal
               sumVal = sumDot;
               bestPerm = allcomb(j,:);
@@ -25,8 +23,6 @@ function [newConcept, overlapConcept, overlapConceptOld, missingConcept]=findCon
               fprintf('Something has gone wrong');
           end
         end
-%        disp(bestVal);
-%        disp(bestPerm);
        newConcept = bestPerm(bestVal < threshold);
        overlapConcept= bestPerm(bestVal >= threshold);
        overlapConceptOld = previousCol(bestVal >= threshold);
@@ -40,23 +36,14 @@ function [newConcept, overlapConcept, overlapConceptOld, missingConcept]=findCon
             allcomb = [allcomb; perms(comb(i,:))];
         end
         for j = 1:size(allcomb,1)
-%             val = dot(Aold(end-size(Anew,1)+1:end, allcomb(j,:)), Anew);
             val = dot(Aold(:, allcomb(j,:)), Anew);
             sumDot = sum(val);
-%             disp(j);
-%             disp(allcomb(j,:));
-%             disp(sumDot);
-%             disp(val);
             if sumDot > sumVal
                 sumVal = sumDot;
                 bestPerm = allcomb(j,:);
-%                 bestVal =  dot(Aold(end-size(Anew,1)+1:end, allcomb(j,:)), Anew);
                 bestVal = dot(Aold(:, allcomb(j,:)), Anew);
            end
         end
-%         disp(bestVal);
-%         disp(bestPerm);
-%         k = find(bestPerm);
         newConcept = newCol(bestVal < threshold);
         overlapConcept= newCol(bestVal >= threshold);
         overlapConceptOld = bestPerm(bestVal >= threshold);
@@ -70,32 +57,17 @@ function [newConcept, overlapConcept, overlapConceptOld, missingConcept]=findCon
             allcomb = [allcomb; perms(comb(i,:))];
         end
         for j = 1:size(allcomb,1)
-%            val = dot(Aold, Anew(end-size(Aold,1)+1:end, allcomb(j,:)));
             val = dot(Aold, Anew(:, allcomb(j,:)));
             sumDot = sum(val);
-%             disp(j);
-%             disp(allcomb(j,:));
-%             disp(sumDot);
-%             disp(val);
             if sumDot > sumVal
                 sumVal = sumDot;
                 bestPerm = allcomb(j,:);
                 bestVal = dot(Aold, Anew(:, allcomb(j,:)));
            end
         end 
-%         disp(bestVal);
-%         disp(bestPerm);
-%         k = find(bestPerm);
-%         newConcept = bestPerm(bestVal < threshold);
-        
         overlapConcept= bestPerm(bestVal >= threshold);
         newConcept = setdiff(newCol, overlapConcept);
         overlapConceptOld = previousCol(bestVal >= threshold);
         missingConcept = setdiff(previousCol, overlapConceptOld);
     end
-    
-%     if isequal(sort(overlapConceptOld),sort(overlapConceptNew))
-%         overlapConceptNew = [];
-%     end
-%     Handle the case when there is a partial overalap
 end
