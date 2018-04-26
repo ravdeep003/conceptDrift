@@ -1,5 +1,5 @@
 # conceptDrift
-Concept Drift in Streaming Tensor Decomposition: This is an implementation of Concept Drift in streaming Tensor Decomposition.
+Concept Drift in Streaming Tensor Decomposition: This is an implementation of Concept Drift in streaming Tensor Decomposition as discussed in the paper(https://arxiv.org/abs/1804.09619)
 
 ## prerequisite
 
