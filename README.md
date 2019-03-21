@@ -1,7 +1,7 @@
 # conceptDrift
 Concept Drift in Streaming Tensor Decomposition: This is an implementation of Concept Drift in streaming Tensor Decomposition as discussed in the [paper](https://arxiv.org/abs/1804.09619)
 
-## prerequisite
+## Requirements
 
 * [Tensor Toolbox](http://www.sandia.gov/~tgkolda/TensorToolbox/index-2.6.html)
 * [AutoTen](https://epubs.siam.org/doi/abs/10.1137/1.9781611974348.80)
