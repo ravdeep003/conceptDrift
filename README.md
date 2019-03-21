@@ -1,7 +1,8 @@
 # conceptDrift
 Concept Drift in Streaming Tensor Decomposition: This is an implementation of Concept Drift in streaming Tensor Decomposition as discussed in the [paper](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_20).
 If you use this code please cite us:
-> @inproceedings{pasricha2018identifying,
+```
+@inproceedings{pasricha2018identifying,
   title={Identifying and alleviating concept drift in streaming tensor decomposition},
   author={Pasricha, Ravdeep and Gujral, Ekta and Papalexakis, Evangelos E},
   booktitle={Joint European Conference on Machine Learning and Knowledge Discovery in Databases},
@@ -9,6 +10,7 @@ If you use this code please cite us:
   year={2018},
   organization={Springer}
 }
+```
 
 ## Requirements
 
